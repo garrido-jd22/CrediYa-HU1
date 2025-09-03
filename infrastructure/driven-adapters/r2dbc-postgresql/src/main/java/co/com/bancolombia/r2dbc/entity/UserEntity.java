@@ -38,4 +38,7 @@ public class UserEntity {
 
     @Column("id_rol")
     private Long idRol;
+
+    @Column("clave")
+    private String password;
 }

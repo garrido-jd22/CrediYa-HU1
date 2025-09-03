@@ -48,15 +48,6 @@ public class UserRouterRest {
                             responses = {
                                     @ApiResponse(responseCode = "200", description = "Usuario registrado correctamente",
                                             content = @Content(mediaType = "application/json",
-                                                    schema = @Schema(implementation = String.class))),
-                                    @ApiResponse(responseCode = "400", description = "Error de validación de datos",
-                                            content = @Content(mediaType = "application/json",
-                                                    schema = @Schema(implementation = String.class))),
-                                    @ApiResponse(responseCode = "409", description = "Error de email o identificación existente",
-                                            content = @Content(mediaType = "application/json",
-                                                    schema = @Schema(implementation = String.class))),
-                                    @ApiResponse(responseCode = "500", description = "Error interno del servidor",
-                                            content = @Content(mediaType = "application/json",
                                                     schema = @Schema(implementation = String.class)))
                             }
                     )

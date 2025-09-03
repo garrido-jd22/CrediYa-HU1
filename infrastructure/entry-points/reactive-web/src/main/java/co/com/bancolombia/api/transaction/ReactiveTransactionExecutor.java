@@ -1,6 +1,5 @@
 package co.com.bancolombia.api.transaction;
 
-import co.com.bancolombia.usecase.transaction.TransactionExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Mono;

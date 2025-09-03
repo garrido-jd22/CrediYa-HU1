@@ -31,5 +31,6 @@ cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
 routes:
   paths:
+    userLogin: "/api/v1/login"
     user: "/api/v1/usuarios"
     userById: "/api/v1/usuarios/{id}"

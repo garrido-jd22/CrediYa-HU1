@@ -20,4 +20,5 @@ public class User {
     private String phone;
     private BigDecimal baseSalary;
     private Long idRol;
+    private String password;
 }

@@ -9,13 +9,13 @@ public class UserMapper {
     // De DTO de request a modelo de dominio
     public static User toDomain(UserRequestDTO dto) {
         return User.builder()
-                .idUser(dto.idUser())
                 .name(dto.name())
                 .lastName(dto.lastName())
                 .identityDocument(dto.identityDocument())
                 .email(dto.email())
                 .phone(dto.phone())
                 .baseSalary(dto.baseSalary())
+                .password(dto.password())
                 .idRol(dto.idRol())
                 .build();
     }

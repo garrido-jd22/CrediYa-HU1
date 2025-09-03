@@ -3,6 +3,9 @@ package co.com.bancolombia.api;
 import co.com.bancolombia.api.dto.ApiResponse;
 import co.com.bancolombia.api.dto.UserRequestDTO;
 import co.com.bancolombia.api.helper.UserMapper;
+import co.com.bancolombia.model.exception.UnauthorizedActionException;
+import co.com.bancolombia.r2dbc.jwt.JwtProvider;
+import co.com.bancolombia.api.transaction.TransactionExecutor;
 import co.com.bancolombia.usecase.user.UserUseCase;
 import jakarta.validation.ConstraintViolation;
 import lombok.RequiredArgsConstructor;
@@ -13,8 +16,6 @@ import jakarta.validation.Validator;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
-import co.com.bancolombia.model.exception.EmailAlreadyExistsException;
-import co.com.bancolombia.model.exception.InvalidSalaryException;
 
 import java.util.Map;
 import java.util.Set;
@@ -26,10 +27,26 @@ public class UserHandler {
 
     private final UserUseCase userUseCase;
     private final Validator validator;
+    private final JwtProvider jwtProvider;
+    private final TransactionExecutor transactionExecutor;
 
+    // Agregar un Global Handler para manejar las excepciones.
     public Mono<ServerResponse> listenSaveUser(ServerRequest serverRequest) {
+        String authHeader = serverRequest.headers().firstHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ServerResponse.status(HttpStatus.UNAUTHORIZED)
+                    .bodyValue(Map.of("error", "Token requerido"));
+        }
+        String token = authHeader.substring(7);
+        // Valido el token
+        boolean isValid = jwtProvider.validateToken(token);
+        if (!isValid) {
+            return ServerResponse.status(HttpStatus.FORBIDDEN)
+                    .bodyValue(Map.of("error", "Token inválido"));
+        }
+
         return serverRequest.bodyToMono(UserRequestDTO.class)
-                .flatMap(dto -> {
+                .flatMap(dto -> transactionExecutor.executeTransaction(() -> {
 
                     Set<ConstraintViolation<UserRequestDTO>> violations = validator.validate(dto);
                     if (!violations.isEmpty()) {
@@ -38,9 +55,13 @@ public class UserHandler {
                                 .collect(Collectors.joining(", "));
                         return Mono.error(new IllegalArgumentException(errorMessage));
                     }
+                    Long idRol = jwtProvider.getRoleIdFromToken(token);
+                    if (!(idRol == 1 || idRol == 2)) { // Solo Admin o Asesor
+                        return Mono.error(new UnauthorizedActionException("No tienes permisos para crear un usuario."));
+                    }
 
                     return userUseCase.createUser(UserMapper.toDomain(dto));
-                })
+                }))
                 .flatMap(savedUser -> {
                     String message = "Usuario " + savedUser.getName() + " " + savedUser.getLastName()
                             + " con el ID " + savedUser.getIdUser() + " creado con éxito";
@@ -48,30 +69,20 @@ public class UserHandler {
                     return ServerResponse
                             .status(HttpStatus.CREATED)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .bodyValue(ApiResponse.success(message, savedUser));
+                            .bodyValue(ApiResponse.success(message, UserMapper.toResponse(savedUser)));
                 })
-                .onErrorResume(EmailAlreadyExistsException.class, e ->
-                        ServerResponse.status(HttpStatus.CONFLICT)
-                                .bodyValue(Map.of("error", e.getMessage()))
-                )
-                .onErrorResume(InvalidSalaryException.class, e ->
-                        ServerResponse.status(HttpStatus.BAD_REQUEST)
-                                .bodyValue(Map.of("error", e.getMessage()))
-                )
-                .onErrorResume(IllegalArgumentException.class, e ->
-                        ServerResponse.badRequest()
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .bodyValue(Map.of("error", e.getMessage()))
-                );
+                .onErrorResume(Mono::error);
     }
 
     public Mono<ServerResponse> listenGetUserById(ServerRequest serverRequest) {
         Long id = Long.parseLong(serverRequest.pathVariable("id"));
 
-        return userUseCase.getUserById(id)
-                .flatMap(user -> ServerResponse.ok()
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(user))
-                .switchIfEmpty(ServerResponse.notFound().build());
+        return transactionExecutor.executeTransaction(() ->
+                userUseCase.getUserById(id)
+                        .flatMap(user -> ServerResponse.ok()
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .bodyValue(user))
+                        .switchIfEmpty(ServerResponse.notFound().build())
+        );
     }
 }

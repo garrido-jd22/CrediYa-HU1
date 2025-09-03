@@ -2,8 +2,8 @@ package co.com.bancolombia.config;
 
 import co.com.bancolombia.model.rol.gateways.RolRepository;
 import co.com.bancolombia.model.user.gateways.UserRepository;
+import co.com.bancolombia.model.user.gateways.PasswordEncoderGateway;
 import co.com.bancolombia.usecase.rol.RolUseCase;
-import co.com.bancolombia.usecase.transaction.TransactionExecutor;
 import co.com.bancolombia.usecase.user.UserUseCase;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -19,8 +19,8 @@ import org.springframework.context.annotation.FilterType;
 public class UseCasesConfig {
 
     @Bean
-    public UserUseCase userUseCase(UserRepository userRepository, TransactionExecutor transactionExecutor) {
-        return new UserUseCase(userRepository, transactionExecutor);
+    public UserUseCase userUseCase(UserRepository userRepository, PasswordEncoderGateway passwordEncoderGateway) {
+        return new UserUseCase(userRepository, passwordEncoderGateway);
     }
 
     @Bean

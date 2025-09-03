@@ -1,6 +1,7 @@
 dependencies {
     implementation project(':usecase')
     implementation project(':model')
+    implementation project(':r2dbc-postgresql')
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
@@ -8,7 +9,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     // TransactionOperator
     implementation "org.springframework.boot:spring-boot-starter-data-r2dbc"
-    runtimeOnly "io.r2dbc:r2dbc-postgresql" // PostgreSQL
+    // implementation "io.r2dbc:r2dbc-postgresql:0.8.13" // PostgreSQL
+
     // swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.6.0'
+
+    // Security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 }

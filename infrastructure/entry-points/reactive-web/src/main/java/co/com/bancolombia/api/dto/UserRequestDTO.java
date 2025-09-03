@@ -8,8 +8,6 @@ import java.math.BigDecimal;
 @Schema(description = "Datos necesarios para registrar un usuario")
 public record UserRequestDTO(
 
-        Long idUser,
-
         @NotBlank(message = "El nombre es obligatorio")
         @Schema(description = "Nombre del usuario", example = "Josue")
         String name,
@@ -35,6 +33,14 @@ public record UserRequestDTO(
         @NotNull(message = "El salario base es obligatorio")
         @Schema(description = "Salario base del usuario", example = "1200000")
         BigDecimal baseSalary,
+
+        @NotNull(message = "La contraseña es obligatoria.")
+        @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
+//        @Pattern(
+//                regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).{8,}$",
+//                message = "La contraseña debe incluir mayúsculas, minúsculas, números y caracteres especiales"
+//        )
+        String password,
 
         @NotNull(message = "El ID del rol es obligatorio")
         @Schema(description = "ID del rol", example = "2")

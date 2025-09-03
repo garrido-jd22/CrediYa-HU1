@@ -8,6 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Getter
 @Setter
 public class UserPath {
+    private String userLogin;
     private String user;
     private String userById;
 }
