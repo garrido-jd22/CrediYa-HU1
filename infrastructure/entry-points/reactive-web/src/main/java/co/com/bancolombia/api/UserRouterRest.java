@@ -2,6 +2,7 @@ package co.com.bancolombia.api;
 
 import co.com.bancolombia.api.config.UserPath;
 import co.com.bancolombia.api.dto.UserRequestDTO;
+import co.com.bancolombia.api.helper.LoginResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -48,13 +49,17 @@ public class UserRouterRest {
                             responses = {
                                     @ApiResponse(responseCode = "200", description = "Usuario registrado correctamente",
                                             content = @Content(mediaType = "application/json",
-                                                    schema = @Schema(implementation = String.class)))
+                                                    schema = @Schema(implementation = LoginResponseWrapper.class))),
+                                    @ApiResponse(responseCode = "401", description = "Error al crear el usuario",
+                                            content = @Content(mediaType = "application/json",
+                                                    schema = @Schema(implementation = co.com.bancolombia.api.dto.ApiResponse.class)))
                             }
                     )
             )
     })
     public RouterFunction<ServerResponse> routerFunction(UserHandler userHandler) {
         return route(POST(userPath.getUser()), userHandler::listenSaveUser)
-                .and(route(GET(userPath.getUserById()), userHandler::listenGetUserById));
+                .and(route(GET(userPath.getUserById()), userHandler::listenGetUserById))
+                .and(route(GET(userPath.getUserByEmail()), userHandler::listenGetUserByEmail));
     }
 }

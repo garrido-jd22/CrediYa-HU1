@@ -4,7 +4,6 @@ import co.com.bancolombia.api.dto.ErrorResponse;
 import co.com.bancolombia.model.exception.UnauthorizedActionException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -13,7 +12,6 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
 @ControllerAdvice
@@ -59,7 +57,7 @@ public class GlobalExceptionHandler {
         ErrorResponse error = new ErrorResponse(
                 LocalDateTime.now(),
                 status.value(),
-                "Constraint Violation",
+                "Violación de restricción",
                 ex.getMessage(),
                 exchange.getRequest().getURI().getPath()
         );
@@ -73,14 +71,13 @@ public class GlobalExceptionHandler {
         ErrorResponse error = new ErrorResponse(
                 LocalDateTime.now(),
                 status.value(),
-                "Type Mismatch",
+                "Parámetros inválidos",
                 ex.getMessage(),
                 exchange.getRequest().getURI().getPath()
         );
         return Mono.just(ResponseEntity.status(status).body(error));
     }
 
-    // Ejemplo: Manejo de una excepción personalizada (como UnauthorizedActionException)
     @ExceptionHandler(UnauthorizedActionException.class)
     public Mono<ResponseEntity<ErrorResponse>> handleUnauthorizedActionException(UnauthorizedActionException ex, ServerWebExchange exchange) {
         HttpStatus status = HttpStatus.FORBIDDEN;

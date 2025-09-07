@@ -2,6 +2,7 @@ package co.com.bancolombia.api;
 
 import co.com.bancolombia.api.dto.ApiResponse;
 import co.com.bancolombia.api.dto.UserRequestDTO;
+import co.com.bancolombia.api.dto.UserResponseDTO;
 import co.com.bancolombia.api.helper.UserMapper;
 import co.com.bancolombia.model.exception.UnauthorizedActionException;
 import co.com.bancolombia.r2dbc.jwt.JwtProvider;
@@ -82,6 +83,18 @@ public class UserHandler {
                         .flatMap(user -> ServerResponse.ok()
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .bodyValue(user))
+                        .switchIfEmpty(ServerResponse.notFound().build())
+        );
+    }
+
+    public Mono<ServerResponse> listenGetUserByEmail(ServerRequest serverRequest) {
+        String email = serverRequest.pathVariable("email");
+
+        return transactionExecutor.executeTransaction(() ->
+                userUseCase.getUserByEmail(email)
+                        .flatMap(user -> ServerResponse.ok()
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .bodyValue(UserResponseDTO.fromDomain(user)))
                         .switchIfEmpty(ServerResponse.notFound().build())
         );
     }

@@ -19,10 +19,10 @@ public record UserResponseDTO(
         return new UserResponseDTO(
                 user.getIdUser(),
                 user.getName(),
-                user.getLastName(),
-                // Controlar que la cedula no se repita.
-                user.getIdentityDocument(),
                 user.getEmail(),
+                // Controlar que la cedula no se repita.
+                user.getLastName(),
+                user.getIdentityDocument(),
                 user.getPhone(),
                 user.getBaseSalary(),
                 user.getIdRol()

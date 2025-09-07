@@ -34,7 +34,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/webjars/**"
                         ).permitAll()
-                        .pathMatchers(userPath.getUser()).authenticated()
+                        .pathMatchers(userPath.getUser(), userPath.getUserByEmail()).authenticated()
                         .anyExchange().authenticated()
                 )
                 .addFilterAt(new JwtAuthenticationFilter(jwtProvider), SecurityWebFiltersOrder.AUTHENTICATION)

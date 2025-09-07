@@ -1,6 +1,8 @@
 package co.com.bancolombia.api.config;
 
+import co.com.bancolombia.model.rol.UserRole;
 import co.com.bancolombia.r2dbc.jwt.JwtProvider;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,13 +19,10 @@ import java.util.List;
 //Intercepta todas las solicitudes antes de que lleguen a tus controladores.
 //Busca el header Authorization.
 //Si encuentra Bearer <token>:
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter implements WebFilter {
 
     private final JwtProvider jwtProvider;
-
-    public JwtAuthenticationFilter(JwtProvider jwtProvider) {
-        this.jwtProvider = jwtProvider;
-    }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
@@ -41,9 +40,12 @@ public class JwtAuthenticationFilter implements WebFilter {
                 String email = jwtProvider.getEmailFromToken(token);
                 Long roleId = jwtProvider.getRoleIdFromToken(token);
 
+                // Mapear id → nombre
+                UserRole role = UserRole.fromId(roleId);
+
                 // Convierto roleId a GrantedAuthority
                 List<GrantedAuthority> authorities = List.of(
-                        new SimpleGrantedAuthority("ROLE_" + roleId)
+                        new SimpleGrantedAuthority("ROLE_" + role.getName())
                 );
 
                 UsernamePasswordAuthenticationToken authentication =

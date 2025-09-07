@@ -6,12 +6,14 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Date;
+import java.util.function.Function;
 
 @Component
 public class JwtProvider {
 
-    private static final String SECRET = "secret_key_example_secret_key_example"; // mínimo 32 caracteres
+    private static final String SECRET = "claveSuperSecreta123456789_claveSuperSegura123"; // mínimo 32 caracteres
     private static final long EXPIRATION = 1000 * 60 * 60; // 1 hora
 
     private final SecretKey secretKey = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
@@ -20,6 +22,7 @@ public class JwtProvider {
         return Jwts.builder()
                 .setSubject(email)
                 .claim("idRol", idRol)
+                .claim("email", email)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
                 .signWith(secretKey, SignatureAlgorithm.HS256)
@@ -36,15 +39,6 @@ public class JwtProvider {
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
-    }
-
-    public String extractUsername(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
     }
 
     public String getEmailFromToken(String token) {
@@ -66,5 +60,15 @@ public class JwtProvider {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = getClaims(token);
+        return claimsResolver.apply(claims);
+    }
+
+    public Instant getExpirationFromToken(String token) {
+        Date expiration = extractClaim(token, Claims::getExpiration);
+        return expiration.toInstant();
     }
 }

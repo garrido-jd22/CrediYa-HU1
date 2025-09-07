@@ -33,4 +33,5 @@ routes:
   paths:
     userLogin: "/api/v1/login"
     user: "/api/v1/usuarios"
-    userById: "/api/v1/usuarios/{id}"
+    userById: "/api/v1/usuario/{id}"
+    userByEmail: "/api/v1/usuario/email/{email}"

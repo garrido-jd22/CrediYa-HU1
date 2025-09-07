@@ -40,4 +40,10 @@ public class UserUseCase {
         return userRepository.findById(id);
     }
 
+    public Mono<User> getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    // Debo crear un caso de uso Login???
+
 }
